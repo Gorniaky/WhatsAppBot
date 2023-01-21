@@ -1,3 +1,21 @@
+# developer
+
+# outDir
+out
+
+# test files
+test*.js
+
+# ignore average files with this pattern
+**/.ignore.*
+
+# private
+.wwebjs_auth
+tokens
+**/token.json
+
+# Node defaults
+
 # Logs
 logs
 *.log
