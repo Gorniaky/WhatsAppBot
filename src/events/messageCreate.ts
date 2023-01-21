@@ -1,6 +1,7 @@
 import { Events } from "whatsapp-web.js";
 import { client } from "../client";
 import commandHandler from "../commands";
+import { Command } from "../structures";
 
 client.on(Events.MESSAGE_CREATE, async (message) => {
   const matched = message.body.match(/^(?:\/)([\w\W]+)$/);
@@ -10,7 +11,7 @@ client.on(Events.MESSAGE_CREATE, async (message) => {
   const commandName = message.commandName = message.args.shift()?.toLowerCase();
   if (!commandName) return;
 
-  const command = commandHandler.data.get(commandName);
+  const command = commandHandler.data.message.get(commandName) as Command;
   if (!command || command.data.private) return;
 
   try {

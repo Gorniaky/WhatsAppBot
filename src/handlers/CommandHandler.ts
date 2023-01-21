@@ -1,15 +1,49 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { Command } from "../structures";
 import BaseHandler from "./BaseHandler";
 
-export class CommandHandler extends BaseHandler<Command> {
+const ext = __filename.split(".").pop()!;
+const regexp = RegExp(`(?=index\\.js$)|(\\.${ext}$)`);
+
+export class CommandHandler extends BaseHandler {
+  data: Record<string, Map<string, any>> = {};
+
   constructor(path: string) {
     super(path);
+    this.read();
     this.load();
   }
 
-  async load(files = this.found) {
-    for (const file of files) {
-      const importedFile = await import(`${file}`);
+  protected read(path = this.path) {
+    const readed = readdirSync(path, { withFileTypes: true });
+
+    for (const fileOrDir of readed) {
+      if (fileOrDir.isDirectory()) {
+        this.data[fileOrDir.name] = new Map();
+        this.read(join(path, fileOrDir.name));
+      } else if (fileOrDir.isFile()) {
+        if (regexp.test(fileOrDir.name))
+          this.found.push(join(path, fileOrDir.name));
+      }
+    }
+
+    return this;
+  }
+
+  protected async load(files = this.found) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      let importedFile;
+      try {
+        importedFile = await import(`${file}`);
+      } catch {
+        console.error("Error on loading command:", `${file}`.split(/\\|\//g).at(-1));
+        files.splice(i, 1);
+        i--;
+        continue;
+      }
 
       let data: Command;
       try {
@@ -20,11 +54,13 @@ export class CommandHandler extends BaseHandler<Command> {
 
       if (!data.data || !data.execute) continue;
 
-      this.data.set(data.data.name, data);
-      data.data.aliases?.forEach(alias => this.data.set(alias, data));
+      const filePath = `${file}`.split(/\\|\//g).at(-2)!;
+
+      this.data[filePath].set(data.data.name, data);
+      data.data.aliases?.forEach(alias => this.data[filePath].set(alias, data));
     }
 
-    console.log("Loaded " + this.data.size + " commands.");
+    console.log("Loaded", files.length, "commands.");
 
     return this;
   }
