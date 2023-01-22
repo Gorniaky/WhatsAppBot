@@ -1,5 +1,6 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { Commandtypes } from "../@types";
 import { Command } from "../structures";
 import BaseHandler from "./BaseHandler";
 
@@ -7,7 +8,7 @@ const ext = __filename.split(".").pop()!;
 const regexp = RegExp(`(?=index\\.js$)|(\\.${ext}$)`);
 
 export class CommandHandler extends BaseHandler {
-  data: Record<string, Map<string, any>> = {};
+  data = <Record<`${Commandtypes}`, Map<string, any>>>{};
 
   constructor(path: string) {
     super(path);
@@ -20,7 +21,7 @@ export class CommandHandler extends BaseHandler {
 
     for (const fileOrDir of readed) {
       if (fileOrDir.isDirectory()) {
-        this.data[fileOrDir.name] = new Map();
+        this.data[<`${Commandtypes}`>fileOrDir.name] = new Map();
         this.read(join(path, fileOrDir.name));
       } else if (fileOrDir.isFile()) {
         if (regexp.test(fileOrDir.name))
@@ -54,7 +55,7 @@ export class CommandHandler extends BaseHandler {
 
       if (!data.data || !data.execute) continue;
 
-      const filePath = `${file}`.split(/\\|\//g).at(-2)!;
+      const filePath = <`${Commandtypes}`>`${file}`.split(/\\|\//g).at(-2);
 
       this.data[filePath].set(data.data.name, data);
       data.data.aliases?.forEach(alias => this.data[filePath].set(alias, data));

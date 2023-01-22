@@ -1,6 +1,5 @@
-import { join } from "node:path";
 import { CommandHandler } from "../handlers";
 
-const commandHandler = new CommandHandler(join(__dirname));
+const commandHandler = new CommandHandler(__dirname);
 
 export default commandHandler;
