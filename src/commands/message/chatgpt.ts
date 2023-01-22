@@ -19,7 +19,7 @@ export default class ChatGPT extends Command {
         if (typeof response === "string")
           return message.reply(response);
 
-        return message.reply(new MessageMedia("image/png", `${response.b64_json}`));
+        return message.reply(await MessageMedia.fromUrl(response.url!));
       }
       case "gpt":
       case "ai":
@@ -54,7 +54,6 @@ export default class ChatGPT extends Command {
         n: 1,
         prompt,
         size: "1024x1024",
-        response_format: "b64_json",
       });
 
       return response.data.data[0];
