@@ -1,5 +1,6 @@
+export * from "./handlers";
 export * from "./structures";
 
-export enum Commandtypes {
+export enum CommandTypes {
   message = "message"
 }
